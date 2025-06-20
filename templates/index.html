@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Underwater Object Detection Application</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #eef2f7;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #004085;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        h3 {
+             color: #0056b3;
+             margin-bottom: 15px;
+             font-weight: 500;
+        }
+        .upload-form {
+            margin-bottom: 40px;
+            padding: 30px;
+            border: 2px dashed #a0c4ff;
+            border-radius: 10px;
+            background-color: #e0f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        .upload-form input[type="file"] {
+            padding: 10px;
+            border: 1px solid #b3e5fc;
+            border-radius: 5px;
+            background-color: #ffffff;
+            cursor: pointer;
+        }
+        .upload-form button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        .upload-form button:hover {
+            background-color: #0056b3;
+        }
+        
+        .image-section {
+            display: flex;
+            justify-content: space-around;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        .image-box {
+            flex: 1;
+            min-width: 300px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        .image-box img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+        .results-section {
+            margin-top: 40px;
+            text-align: left;
+            border-top: 2px solid #e0e0e0;
+            padding-top: 30px;
+        }
+        .results-section h3 {
+            color: #1e7e34;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .detection-list {
+            list-style: none;
+            padding: 0;
+        }
+        .detection-list li {
+            margin-bottom: 10px;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            border: 1px solid #c3e6cb;
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .detection-list li.animal_fish {
+            background-color: #cfe2ff;
+            border-color: #b9d1ea;
+            color: #084298;
+        }
+        .detection-list li.animal:not(.animal_fish) {
+             background-color: #fff3cd;
+             border-color: #ffeeba;
+             color: #856404;
+        }
+        .detection-list li.rov {
+             background-color: #d1e7dd;
+             border-color: #badbcc;
+             color: #0f5132;
+        }
+        .detection-list li.trash {
+             background-color: #f8d7da;
+             border-color: #f5c6cb;
+             color: #721c24;
+        }
+        .class-name {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .class-type {
+            font-size: 0.85em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Underwater Object Detection Application</h1>
+        <div class="upload-form">
+            <form id="uploadForm" enctype="multipart/form-data">
+                <input type="file" name="file" accept="image/*" required>
+                <button type="submit">Upload and Analyze</button>
+            </form>
+        </div>
+        
+        <div class="image-section">
+            <div class="image-box">
+                <h3>Original Image</h3>
+                <img id="gtImage" src="" alt="Original Image">
+            </div>
+            <div class="image-box">
+                <h3>Predicted Image</h3>
+                <img id="predImage" src="" alt="Predicted Image">
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <h3>Detected Objects</h3>
+            <ul class="detection-list" id="detectionList">
+                <!-- Detection results will be added here -->
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        // Helper function to format class names
+        function formatClassName(className) {
+            // Remove terminal/nonterminal prefix
+            let baseName = className.replace(/^(terminal_|nonterminal_)/, '');
+            // Remove animal_ prefix if present
+            baseName = baseName.replace(/^animal_/, '');
+            // Replace underscores with spaces and capitalize words
+            return baseName.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        }
+
+        // Helper function to determine class type (Terminal/Non-terminal)
+        function getClassType(className) {
+             if (className.startsWith('terminal_')) {
+                 return 'Terminal';
+             } else if (className.startsWith('nonterminal_')) {
+                 return 'Non-terminal';
+             }
+             return ''; // Should not happen with current class names
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            // Clear and hide the results section
+            document.getElementById('detectionList').innerHTML = '';
+            document.getElementById('resultsSection').style.display = 'none';
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('gtImage').src = data.gt_image;
+                    document.getElementById('predImage').src = data.pred_image;
+
+                    // List detected objects
+                    const detectionList = document.getElementById('detectionList');
+                    if (data.pred_boxes && data.pred_boxes.length > 0) {
+                        data.pred_boxes.forEach(detection => {
+                            const listItem = document.createElement('li');
+                            
+                            // Apply different classes based on object type
+                            if (detection.class === 'animal_fish') {
+                                listItem.classList.add('animal_fish');
+                            } else if (detection.class.startsWith('animal_')) {
+                                listItem.classList.add('animal');
+                            } else if (detection.class === 'rov') {
+                                listItem.classList.add('rov');
+                            } else if (detection.class.startsWith('trash_')) {
+                                listItem.classList.add('trash');
+                            }
+
+                            const formattedName = formatClassName(detection.class);
+                            const classType = getClassType(detection.class);
+
+                            listItem.innerHTML = `
+                                <span class="class-name">${formattedName}</span>
+                                <span class="class-type">(${classType})</span><br>
+                                Confidence: ${detection.confidence}, Box: [${detection.bbox.join(', ')}]
+                            `;
+                            detectionList.appendChild(listItem);
+                        });
+                        document.getElementById('resultsSection').style.display = 'block';
+                    } else {
+                         const listItem = document.createElement('li');
+                         listItem.textContent = 'No objects detected.';
+                         detectionList.appendChild(listItem);
+                         document.getElementById('resultsSection').style.display = 'block';
+                    }
+
+                } else {
+                    alert(data.error || 'An error occurred');
+                }
+            } catch (error) {
+                alert('An error occurred: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
