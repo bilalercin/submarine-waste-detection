@@ -33,10 +33,25 @@ Marine pollution is a growing environmental problem, with waste materials accumu
 - tqdm
 
 ## Dataset Details
-The project uses a dataset of underwater images labeled in COCO format. The dataset includes:
-- **Images:** Underwater scenes containing both marine life and various types of waste.
-- **Annotations:** COCO-style JSON files with bounding boxes and class labels.
-- **Classes:** 22 different categories, including marine animals (fish, starfish, crab, etc.) and waste types (bottle, bag, net, rope, etc.).
+**Source:** [TrashCan 1.0: An Instance-Segmentation Labeled Dataset of Trash Observations](https://conservancy.umn.edu/items/6dd6a960-c44a-4510-a679-efb8c82ebfb7)  
+**Authors:** Jungseok Hong, Michael S. Fulton, Junaed Sattar  
+**Published:** July 23, 2020  
+**DOI:** [10.13020/g1gx-y834](https://doi.org/10.13020/g1gx-y834)
+
+The TrashCan dataset consists of 7,212 annotated underwater images containing observations of trash, ROVs, and a wide variety of undersea flora and fauna. The annotations are in instance segmentation format, with bitmaps marking which pixels in the image contain each object. The imagery is sourced from the J-EDI (JAMSTEC E-Library of Deep-sea Images) dataset, curated by the Japan Agency of Marine Earth Science and Technology (JAMSTEC). The dataset includes two versions: TrashCan-Material and TrashCan-Instance, corresponding to different object class configurations.
+
+- **Collection period:** 2019-06-24 to 2020-06-30
+- **Classes:** 22 different categories, including marine animals (fish, starfish, crab, etc.) and waste types (bottle, bag, net, rope, etc.)
+- **Format:** Images and instance segmentation masks (COCO-style JSON)
+- **Purpose:** To facilitate research on underwater trash detection and removal, especially for autonomous robots
+
+**License:** Free for academic teaching/research use. Commercial use requires permission from JAMSTEC. See LICENSE.txt in the dataset for details.
+
+**Reference publication:**
+Hong, J., Fulton, M., & Sattar, J. (2020). TrashCan: A Semantically-Segmented Dataset towards Visual Detection of Marine Debris. arXiv preprint [arXiv:2007.08097](https://arxiv.org/abs/2007.08097)
+
+**Citation:**
+Hong, Jungseok; Fulton, Michael S; Sattar, Junaed. (2020). TrashCan 1.0 An Instance-Segmentation Labeled Dataset of Trash Observations. Retrieved from the Data Repository for the University of Minnesota (DRUM), https://doi.org/10.13020/g1gx-y834.
 
 ## Data Preparation
 1. **COCO to YOLO Conversion:**
