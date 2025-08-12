@@ -9,7 +9,7 @@ app = Flask(__name__, static_folder='static')
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max-limit
 
-# 22 sınıfı terminal/nonterminal önekleriyle ayır
+# 22 sınıf terminal/nonterminal 
 TERMINAL_CLASSES = ['animal_fish', 'animal_starfish', 'animal_shells', 'animal_crab', 'animal_eel', 'animal_etc']
 ALL_CLASSES = ['rov', 'plant', 'animal_fish', 'animal_starfish', 'animal_shells', 'animal_crab', 'animal_eel', 'animal_etc',
         'trash_clothing', 'trash_pipe', 'trash_bottle', 'trash_bag', 'trash_snack_wrapper', 'trash_can',
@@ -19,10 +19,9 @@ CLASS_NAMES = [
     ('terminal_' if c in TERMINAL_CLASSES else 'nonterminal_') + c for c in ALL_CLASSES
 ]
 
-# YOLO modelini yükle
 model = YOLO('/Users/bilalercin/userai/runs/trashcan/yolov8_trashcan2/weights/best.pt')
 
-# Upload klasörünü oluştur
+
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
